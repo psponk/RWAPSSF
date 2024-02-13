@@ -21,7 +21,7 @@ contract RPS is CommitReveal {
         require(msg.value == 1 ether);
         reward += msg.value;
         player[numPlayer].addr = payable(msg.sender);
-        player[numPlayer].choice = 7; // กำหนดให้เริ่มต้นที่เลือก 7 สำหรับการเริ่มเกม
+        player[numPlayer].choice = 7; // กำหนดให้เริ่มต้นที่ตัวเลือก 7 สำหรับการเริ่มเกม
         player[numPlayer].timestamp = block.timestamp;
         numPlayer++;
     }
