@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity >=0.8.0 <0.9.0;
 import "./CommitReveal.sol";
 
 contract RPS is CommitReveal {
     struct Player {
         uint choice; // 0 - Rock, 1 - Fire , 2 - Scissors, 3 - Sponge , 4 - Paper , 5 - Air , 6 - Water , 7 - undefind 
         address addr;
-        uint timestamps;
+        uint timestamp; // เวลาที่ผู้เล่นลงทะเบียนเข้าร่วมเกม
         bool input;
     }
     uint public numPlayer = 0;
     uint public reward = 0;
     mapping (uint => Player) public player;
     uint public numInput = 0;
+    uint public refundTime = 1 days; // เวลาลิมิตที่ใช้กำหนดเวลาในการเล่นถ้าเกินกว่านี้จะลงโืทษหรือคืนเงิน
 
     function addPlayer() public payable {
         require(numPlayer < 2);
@@ -21,6 +22,7 @@ contract RPS is CommitReveal {
         reward += msg.value;
         player[numPlayer].addr = msg.sender;
         player[numPlayer].choice = 3;
+        player[numPlayer].timestamp = block.timestamp;
         numPlayer++;
     }
 
@@ -53,5 +55,14 @@ contract RPS is CommitReveal {
             account0.transfer(reward / 2);
             account1.transfer(reward / 2);
         }
+    }
+    //ฟังก์ชันสำหรับคืนเงิน
+    function refund() public {
+        require(numPlayer == 2 && numInput < 2);
+        require(block.timestamp >= player[0].timestamp + refundTime && block.timestamp >= player[1].timestamp + refundTime);
+        address payable account0 = payable(player[0].addr);
+        address payable account1 = payable(player[1].addr);
+        account0.transfer(reward);
+        account1.transfer(reward);
     }
 }
